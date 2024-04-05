@@ -12,6 +12,7 @@ import scalafx.scene.shape.Rectangle
 import scalafx.util.Duration
 import scalafx.beans.property.IntegerProperty
 import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyCode.*
 
 object Main extends JFXApp3 {
 
@@ -41,11 +42,11 @@ object Main extends JFXApp3 {
         }
         onKeyPressed = { key =>
           key.getCode() match {
-            case KeyCode.UP    => direction.update(1)
-            case KeyCode.DOWN  => direction.update(2)
-            case KeyCode.LEFT  => direction.update(3)
-            case KeyCode.RIGHT => direction.update(4)
-            case _             => ()
+            case UP    => direction.update(1)
+            case DOWN  => direction.update(2)
+            case LEFT  => direction.update(3)
+            case RIGHT => direction.update(4)
+            case _     => ()
           }
         }
       }

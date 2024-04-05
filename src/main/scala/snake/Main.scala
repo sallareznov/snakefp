@@ -25,10 +25,12 @@ object Main extends JFXApp3 {
   // 2 = bas
   // 3 = gauche
   // 4 = droite
+  val cellSize = 25
 
   override def start(): Unit = {
+
     val snakeState: ObjectProperty[Snake] = ObjectProperty(Snake(List((250, 200), (225, 200), (200, 200))))
-    val direction                         = IntegerProperty(4) // droite
+    val directionState: IntegerProperty   = IntegerProperty(4) // droite
 
     stage = new PrimaryStage {
       title = "Snake"
@@ -42,10 +44,10 @@ object Main extends JFXApp3 {
         }
         onKeyPressed = { key =>
           key.getCode() match {
-            case UP    => direction.update(1)
-            case DOWN  => direction.update(2)
-            case LEFT  => direction.update(3)
-            case RIGHT => direction.update(4)
+            case UP    => directionState.update(1)
+            case DOWN  => directionState.update(2)
+            case LEFT  => directionState.update(3)
+            case RIGHT => directionState.update(4)
             case _     => ()
           }
         }
@@ -53,7 +55,7 @@ object Main extends JFXApp3 {
     }
 
     new Timeline {
-      keyFrames = List(KeyFrame(time = Duration(25), onFinished = _ => snakeState.update(snakeState.value)))
+      keyFrames = List(KeyFrame(time = Duration(500), onFinished = _ => snakeState.update(snakeState.value.move(directionState.value))))
       cycleCount = Indefinite
     }.play()
 
@@ -64,8 +66,8 @@ object Main extends JFXApp3 {
       new Rectangle {
         x = cellX
         y = cellY
-        width = 25
-        height = 25
+        width = cellSize
+        height = cellSize
         fill = Green
       }
     }

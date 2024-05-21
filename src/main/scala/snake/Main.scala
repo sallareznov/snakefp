@@ -11,65 +11,57 @@ import scalafx.scene.paint.Color.*
 import scalafx.scene.shape.Rectangle
 import scalafx.util.Duration
 import scalafx.beans.property.IntegerProperty
-import javafx.scene.input.KeyCode
+import javafx.scene.input.{KeyCode, KeyEvent}
 import javafx.scene.input.KeyCode.*
 
 object Main extends JFXApp3 {
 
-  // stage (scene)
-  // timeline on stage
-  // timeline onFinished => update snakeState => onChange => redraw snake
-
-  // direction:
-  // 1 = haut
-  // 2 = bas
-  // 3 = gauche
-  // 4 = droite
-  val cellSize = 25
+  private val windowSize: Int = 600
+  val cellSize: Int           = 25
+  val numberOfCells: Int      = windowSize / cellSize
 
   override def start(): Unit = {
+    val gameState: ObjectProperty[GameState] = ObjectProperty(
+      GameState(
+        Snake(List((250, 200), (225, 200), (200, 200))),
+        Food.random(numberOfCells, cellSize)
+      )
+    )
 
-    val snakeState: ObjectProperty[Snake] = ObjectProperty(Snake(List((250, 200), (225, 200), (200, 200))))
-    val directionState: IntegerProperty   = IntegerProperty(4) // droite
+    val directionState: ObjectProperty[Direction] = ObjectProperty(Direction.RIGHT)
 
     stage = new PrimaryStage {
       title = "Snake"
-      width = 600
-      height = 600
+      width = windowSize
+      height = windowSize
       scene = new Scene {
         fill = White
-        content = drawSnake(snakeState)
-        snakeState.onChange {
-          content = drawSnake(snakeState)
+        content = gameState.value.draw(cellSize)
+        gameState.onChange {
+          content = gameState.value.draw(cellSize)
         }
-        onKeyPressed = { key =>
-          key.getCode() match {
-            case UP    => directionState.update(1)
-            case DOWN  => directionState.update(2)
-            case LEFT  => directionState.update(3)
-            case RIGHT => directionState.update(4)
-            case _     => ()
-          }
-        }
+        onKeyPressed = updateDirection(directionState, _)
       }
     }
 
     new Timeline {
-      keyFrames = List(KeyFrame(time = Duration(500), onFinished = _ => snakeState.update(snakeState.value.move(directionState.value))))
+      keyFrames = List(
+        KeyFrame(
+          time = Duration(500),
+          onFinished = _ => gameState.update(gameState.value.move(directionState.value, windowSize, numberOfCells, cellSize))
+        )
+      )
       cycleCount = Indefinite
     }.play()
-
   }
 
-  def drawSnake(snakeState: ObjectProperty[Snake]) =
-    snakeState.value.body.map { (cellX, cellY) =>
-      new Rectangle {
-        x = cellX
-        y = cellY
-        width = cellSize
-        height = cellSize
-        fill = Green
-      }
+  private def updateDirection(directionState: ObjectProperty[Direction], key: KeyEvent): Unit =
+    key.getCode match {
+      case UP    => directionState.update(Direction.UP)
+      case DOWN  => directionState.update(Direction.DOWN)
+      case LEFT  => directionState.update(Direction.LEFT)
+      case RIGHT => directionState.update(Direction.RIGHT)
+      case _     => ()
     }
 
 }
